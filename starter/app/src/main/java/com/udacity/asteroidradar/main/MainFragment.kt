@@ -17,6 +17,7 @@ class MainFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         val binding = FragmentMainBinding.inflate(inflater)
         binding.lifecycleOwner = this
+        binding.asteroidRecycler.adapter = AsteroidListAdapter()
 
         binding.viewModel = viewModel
 
