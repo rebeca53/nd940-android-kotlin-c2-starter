@@ -3,7 +3,6 @@ package com.udacity.asteroidradar.api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.udacity.asteroidradar.PictureOfDay
-import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -29,12 +28,12 @@ private val retrofit = Retrofit.Builder()
 
 interface NASAApiService {
     @GET("planetary/apod?api_key=$API_KEY")
-    fun getImageOfDay():
-            Call<PictureOfDay>
+    suspend fun getImageOfDay(): // suspend will let function to run in a coroutine scope
+            PictureOfDay
 
     @GET("neo/rest/v1/feed?start_date=$START_DATE&end_date=$END_DATE&api_key=$API_KEY")
-    fun getAsteroids():
-            Call<Any>
+    suspend fun getAsteroids(): // suspend will let function to run in a coroutine scope
+            Any
 }
 
 object NASAApi {

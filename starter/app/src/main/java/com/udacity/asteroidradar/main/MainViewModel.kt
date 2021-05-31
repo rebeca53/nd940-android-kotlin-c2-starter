@@ -5,15 +5,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.udacity.asteroidradar.Asteroid
-import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.NASAApi
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import kotlinx.coroutines.launch
 import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import java.lang.Exception
 
 
 class MainViewModel : ViewModel() {
@@ -33,36 +31,31 @@ class MainViewModel : ViewModel() {
     }
 
     private fun getImageOfTheDay() {
-        NASAApi.retrofitService.getImageOfDay().enqueue(object : Callback<PictureOfDay> {
-            override fun onResponse(call: Call<PictureOfDay>, response: Response<PictureOfDay>) {
-                currentResponse = response.body().toString()
-                Log.d(TAG, "getImageOfTheDay() Response is ${response.body()?.url}")
+        viewModelScope.launch {
+            try {
+                var pictureOfDay = NASAApi.retrofitService.getImageOfDay()
+                currentResponse = pictureOfDay.toString()
+                Log.d(TAG, "getImageOfTheDay returns $pictureOfDay")
+            } catch (e: Exception) {
+                currentResponse = "getImageOfDay Failure: ${e.message}"
             }
-
-            override fun onFailure(call: Call<PictureOfDay>, t: Throwable) {
-                currentResponse = "Failure: " + t.message
-                Log.e(TAG, "getImageOfTheDay() Failure: " + t.message)
-            }
-        })
+        }
     }
 
     private fun getAsteroids() {
-        NASAApi.retrofitService.getAsteroids().enqueue(object : Callback<Any> {
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                val gson = Gson().toJson(response.body())
-                val json = JSONObject(gson)
-                var listAsteroid = arrayListOf<Asteroid>()
-                response.body()?.let {
-                    listAsteroid = parseAsteroidsJsonResult(json) }
-
-                listAsteroid.forEach{
-                    Log.d(TAG, "getAsteroids() Response is ${it.codename}")
+        viewModelScope.launch {
+            try {
+                val asteroidResult = NASAApi.retrofitService.getAsteroids()
+                val gson = Gson().toJson(asteroidResult)
+                val jsonObject= JSONObject(gson)
+                var listIterator = parseAsteroidsJsonResult(jsonObject)
+                listIterator.forEach {
+                    Log.d(TAG, "getAsteroids returns $it")
                 }
             }
-
-            override fun onFailure(call: Call<Any>, t: Throwable) {
-                Log.e(TAG, "getAsteroids() Failure: " + t.message)
+            catch (e: Exception) {
+                currentResponse = "getAsteroids Failure: ${e.message}"
             }
-        })
+        }
     }
 }
