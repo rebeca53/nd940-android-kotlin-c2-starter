@@ -54,21 +54,6 @@ fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
     return asteroidList
 }
 
-private fun getNextSevenDaysFormattedDates(startDate: String): ArrayList<String> {
-    val formattedDateList = ArrayList<String>()
-    val dateFormat = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
-    val calendar = Calendar.getInstance()
-    val date = dateFormat.parse(startDate)
-    calendar.time = date
-    for (i in 0..7) {
-        val currentTime = calendar.time
-        formattedDateList.add(dateFormat.format(currentTime))
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-    }
-
-    return formattedDateList
-}
-
 private fun getNextSevenDaysFormattedDates(): ArrayList<String> {
     val formattedDateList = ArrayList<String>()
 

@@ -1,5 +1,6 @@
 package com.udacity.asteroidradar
 
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.net.toUri
@@ -7,6 +8,7 @@ import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.udacity.asteroidradar.main.AsteroidListAdapter
+import com.udacity.asteroidradar.main.MainViewModel
 
 @BindingAdapter("statusIcon")
 fun bindAsteroidStatusImage(imageView: ImageView, isHazardous: Boolean) {
@@ -55,15 +57,50 @@ fun bindTextViewToDisplayVelocity(textView: TextView, number: Double) {
     textView.text = String.format(context.getString(R.string.km_s_unit_format), number)
 }
 
-//todo pick better options to placeholder and error pictures
 @BindingAdapter("pictureOfDay")
 fun bindImageViewToPictureOfDay(imageView: ImageView, imgUrl: String?) {
     imgUrl?.let {
         val imgUri = imgUrl.toUri().buildUpon().scheme("https").build()
         Picasso.with(imageView.context)
             .load(imgUri)
-            .placeholder(R.drawable.placeholder_picture_of_day)
-            .error(R.drawable.ic_help_circle)
+            .placeholder(R.drawable.loading_animation)
+            .error(R.drawable.ic_broken_image)
             .into(imageView)
     }
 }
+
+@BindingAdapter("asteroidNASAApiStatus")
+fun bindAsteroidStatus(statusImageView: ImageView, status: MainViewModel.NASAApiStatus?) {
+    when (status) {
+        MainViewModel.NASAApiStatus.LOADING -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.loading_animation)
+        }
+        MainViewModel.NASAApiStatus.ERROR -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.ic_connection_error)
+        }
+        MainViewModel.NASAApiStatus.DONE -> {
+            statusImageView.visibility = View.GONE
+        }
+    }
+}
+
+@BindingAdapter("imageOfDayNASAApiStatus")
+fun bindImageOfDayStatus(statusImageView: ImageView, status: MainViewModel.NASAApiStatus?) {
+    when (status) {
+        MainViewModel.NASAApiStatus.LOADING -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.loading_animation)
+        }
+        MainViewModel.NASAApiStatus.ERROR -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.ic_broken_image)
+        }
+        MainViewModel.NASAApiStatus.DONE -> {
+            statusImageView.visibility = View.GONE
+        }
+    }
+}
+
+

@@ -19,8 +19,14 @@ class MainViewModel : ViewModel() {
     companion object {
         private const val TAG = "MainViewModel"
     }
+    enum class NASAApiStatus { LOADING, ERROR, DONE }
 
-    private lateinit var currentResponse: String
+    private val _statusImageOfDay = MutableLiveData<NASAApiStatus>()
+    val statusImageOfDay: LiveData<NASAApiStatus>
+        get() = _statusImageOfDay
+    private val _statusAsteroids = MutableLiveData<NASAApiStatus>()
+    val statusAsteroids: LiveData<NASAApiStatus>
+        get() = _statusAsteroids
     private var _imageOfDay = MutableLiveData<PictureOfDay>()
     val imageOfDay: LiveData<PictureOfDay>
         get() = _imageOfDay
@@ -34,19 +40,21 @@ class MainViewModel : ViewModel() {
     }
 
     private fun getImageOfTheDay() {
+        _statusImageOfDay.value = NASAApiStatus.LOADING
         viewModelScope.launch {
             try {
                 _imageOfDay.value = NASAApi.retrofitService.getImageOfDay()
-                currentResponse = _imageOfDay.value.toString()
                 Log.d(TAG, "getImageOfTheDay returns ${_imageOfDay.value}")
+                _statusImageOfDay.value = NASAApiStatus.DONE
             } catch (e: Exception) {
-                currentResponse = "getImageOfDay Failure: ${e.message}"
-                Log.e(TAG, currentResponse)
+                _statusImageOfDay.value = NASAApiStatus.ERROR
+                Log.e(TAG, "getImageOfDay Failure: ${e.message}")
             }
         }
     }
 
     private fun getAsteroids() {
+        _statusAsteroids.value = NASAApiStatus.LOADING
         viewModelScope.launch {
             try {
                 val asteroidResult = NASAApi.retrofitService.getAsteroids()
@@ -57,10 +65,12 @@ class MainViewModel : ViewModel() {
                     Log.d(TAG, "getAsteroids returns $it")
                 }
                 _asteroids.value = asteroidList
+                _statusAsteroids.value = NASAApiStatus.DONE
             }
             catch (e: Exception) {
-                currentResponse = "getAsteroids Failure: ${e.message}"
-                Log.e(TAG, currentResponse)
+                _statusAsteroids.value = NASAApiStatus.ERROR
+                _asteroids.value = ArrayList()
+                Log.e(TAG, "getAsteroids Failure: ${e.message}")
             }
         }
     }
