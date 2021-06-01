@@ -1,23 +1,20 @@
 package com.udacity.asteroidradar.main
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
+import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.NASAApi
 import com.udacity.asteroidradar.api.getNextSevenDaysFormattedDates
-import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import com.udacity.asteroidradar.database.AsteroidsRepository
+import com.udacity.asteroidradar.database.getDatabase
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.lang.Exception
 
 enum class AsteroidApiFilter(val value: String) { VIEW_WEEK("week"), VIEW_TODAY("today"), VIEW_SAVED("saved") }
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
         private const val TAG = "MainViewModel"
     }
@@ -32,9 +29,9 @@ class MainViewModel : ViewModel() {
     private var _imageOfDay = MutableLiveData<PictureOfDay>()
     val imageOfDay: LiveData<PictureOfDay>
         get() = _imageOfDay
-    private val _asteroids = MutableLiveData<List<Asteroid>>()
-    val asteroids: LiveData<List<Asteroid>>
-        get() = _asteroids
+
+    private val databaseAsteroid = getDatabase(application)
+    private val asteroidsRepository = AsteroidsRepository(databaseAsteroid)
 
     private val _navigateToSelectedAsteroid = MutableLiveData<Asteroid>()
     val navigateToSelectedAsteroid: LiveData<Asteroid>
@@ -44,6 +41,7 @@ class MainViewModel : ViewModel() {
         getImageOfTheDay()
         getAsteroids(AsteroidApiFilter.VIEW_WEEK)
     }
+    val asteroids = asteroidsRepository.asteroids
 
     private fun getImageOfTheDay() {
         _statusImageOfDay.value = NASAApiStatus.LOADING
@@ -61,8 +59,14 @@ class MainViewModel : ViewModel() {
 
     private fun getAsteroids(filter: AsteroidApiFilter) {
         _statusAsteroids.value = NASAApiStatus.LOADING
+
         viewModelScope.launch {
             try {
+                // todo change what happens when app goes offline and what happens to each menu options
+                    /*
+                    * Fetch and display the asteroids from the database and only fetch the asteroids from today onwards, ignoring asteroids before today.
+                    * Also, display the asteroids sorted by date (Check SQLite documentation to get sorted data using a query).
+                    * */
                 val dateList = getNextSevenDaysFormattedDates()
                 val startDate = dateList[0]
                 val endDate =  when (filter) {
@@ -70,20 +74,12 @@ class MainViewModel : ViewModel() {
                     AsteroidApiFilter.VIEW_TODAY -> dateList.get(0)
                     AsteroidApiFilter.VIEW_SAVED -> dateList.last() //todo implement show saved
                 }
-                val asteroidResult = NASAApi.retrofitService.getAsteroids(startDate, endDate)
-                val gson = Gson().toJson(asteroidResult)
-                val jsonObject= JSONObject(gson)
-                val asteroidList = parseAsteroidsJsonResult(jsonObject)
-                // todo only dump list if verbose mode
-                asteroidList.forEach {
-                    Log.d(TAG, "getAsteroids returns $it")
-                }
-                _asteroids.value = asteroidList
+                asteroidsRepository.refreshAsteroids(startDate, endDate)
+                val asteroidList = asteroidsRepository.asteroids
                 _statusAsteroids.value = NASAApiStatus.DONE
             }
             catch (e: Exception) {
                 _statusAsteroids.value = NASAApiStatus.ERROR
-                _asteroids.value = ArrayList()
                 Log.e(TAG, "getAsteroids Failure: ${e.message}")
             }
         }
@@ -101,4 +97,16 @@ class MainViewModel : ViewModel() {
         getAsteroids(filter)
     }
 
+    /**
+     * Factory for constructing MainViewModel with parameter
+     */
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return MainViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unable to construct viewmodel")
+        }
+    }
 }
