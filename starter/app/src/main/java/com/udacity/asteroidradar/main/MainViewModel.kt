@@ -9,11 +9,13 @@ import com.google.gson.Gson
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.NASAApi
+import com.udacity.asteroidradar.api.getNextSevenDaysFormattedDates
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.Exception
 
+enum class AsteroidApiFilter(val value: String) { VIEW_WEEK("week"), VIEW_TODAY("today"), VIEW_SAVED("saved") }
 
 class MainViewModel : ViewModel() {
     companion object {
@@ -40,7 +42,7 @@ class MainViewModel : ViewModel() {
 
     init {
         getImageOfTheDay()
-        getAsteroids()
+        getAsteroids(AsteroidApiFilter.VIEW_WEEK)
     }
 
     private fun getImageOfTheDay() {
@@ -57,14 +59,22 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun getAsteroids() {
+    private fun getAsteroids(filter: AsteroidApiFilter) {
         _statusAsteroids.value = NASAApiStatus.LOADING
         viewModelScope.launch {
             try {
-                val asteroidResult = NASAApi.retrofitService.getAsteroids()
+                val dateList = getNextSevenDaysFormattedDates()
+                val startDate = dateList[0]
+                val endDate =  when (filter) {
+                    AsteroidApiFilter.VIEW_WEEK -> dateList.last()
+                    AsteroidApiFilter.VIEW_TODAY -> dateList.get(0)
+                    AsteroidApiFilter.VIEW_SAVED -> dateList.last() //todo implement show saved
+                }
+                val asteroidResult = NASAApi.retrofitService.getAsteroids(startDate, endDate)
                 val gson = Gson().toJson(asteroidResult)
                 val jsonObject= JSONObject(gson)
-                var asteroidList = parseAsteroidsJsonResult(jsonObject)
+                val asteroidList = parseAsteroidsJsonResult(jsonObject)
+                // todo only dump list if verbose mode
                 asteroidList.forEach {
                     Log.d(TAG, "getAsteroids returns $it")
                 }
@@ -86,4 +96,9 @@ class MainViewModel : ViewModel() {
     fun displayAsteroidDetailsComplete() {
         _navigateToSelectedAsteroid.value = null
     }
+
+    fun updateFilter(filter: AsteroidApiFilter) {
+        getAsteroids(filter)
+    }
+
 }
