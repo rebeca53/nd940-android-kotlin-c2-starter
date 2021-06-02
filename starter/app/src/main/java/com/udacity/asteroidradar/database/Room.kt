@@ -8,8 +8,14 @@ private lateinit var INSTANCE: AsteroidsDatabase
 
 @Dao
 interface AsteroidDao {
-    @Query("select * from databaseasteroid")
+    @Query("select * from databaseasteroid order by closeApproachDate ASC")
     fun getAsteroids(): LiveData<List<DatabaseAsteroid>>
+
+    @Query("select * from databaseasteroid where closeApproachDate like :today order by closeApproachDate ASC")
+    fun getTodayAsteroids(today: String): LiveData<List<DatabaseAsteroid>>
+
+    @Query("select * from databaseasteroid where closeApproachDate in (:weekDates) order by closeApproachDate ASC")
+    fun getWeekAsteroids(weekDates: List<String>): LiveData<List<DatabaseAsteroid>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg asteroids: DatabaseAsteroid)

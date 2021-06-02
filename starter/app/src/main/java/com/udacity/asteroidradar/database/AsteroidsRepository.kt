@@ -37,4 +37,18 @@ class AsteroidsRepository (private val database: AsteroidsDatabase) {
             database.asteroidDao.insertAll(*asteroidsDatabase)
         }
     }
+
+    suspend fun getTodayAsteroids(today: String): LiveData<List<Asteroid>> {
+        refreshAsteroids(today, today)
+        return Transformations.map(database.asteroidDao.getTodayAsteroids(today)) {
+            it.asDomainModel()
+        }
+    }
+
+    suspend fun getWeekAsteroids(weekDates: List<String>): LiveData<List<Asteroid>> {
+        refreshAsteroids(weekDates[0], weekDates.last())
+        return Transformations.map(database.asteroidDao.getWeekAsteroids(weekDates)) {
+            it.asDomainModel()
+        }
+    }
 }

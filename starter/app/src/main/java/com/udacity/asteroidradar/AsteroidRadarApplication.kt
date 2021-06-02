@@ -2,7 +2,6 @@ package com.udacity.asteroidradar
 
 import android.app.Application
 import android.os.Build
-import android.util.Log
 import androidx.work.*
 import com.udacity.asteroidradar.api.getTodayFormattedDate
 import com.udacity.asteroidradar.worker.RefreshDataWorker
@@ -21,7 +20,8 @@ class AsteroidRadarApplication: Application() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 setRequiresDeviceIdle(true)
             }
-        }.build()
+        }
+        .build()
 
     override fun onCreate() {
         super.onCreate()
@@ -33,7 +33,6 @@ class AsteroidRadarApplication: Application() {
     }
 
     private fun setupRecurringWork() {
-        Log.d("rebeca", "setupRecurringWork")
         val inputDataWithTimes = Data.Builder()
             .putString(RefreshDataWorker.START_DATE, getTodayFormattedDate())
             .putString(RefreshDataWorker.END_DATE, getTodayFormattedDate())
@@ -42,7 +41,7 @@ class AsteroidRadarApplication: Application() {
             .setConstraints(constraints)
             .setInputData(inputDataWithTimes)
             .build()
-        WorkManager.getInstance().enqueueUniquePeriodicWork(
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
             RefreshDataWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
             repeatingRequest

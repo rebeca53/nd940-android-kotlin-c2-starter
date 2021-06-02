@@ -40,7 +40,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         getImageOfTheDay()
     }
-    val asteroids = asteroidsRepository.asteroids
+
+    var asteroids = asteroidsRepository.asteroids
 
     private fun getImageOfTheDay() {
         _statusImageOfDay.value = NASAApiStatus.LOADING
@@ -63,19 +64,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                // todo change what happens when app goes offline and what happens to each menu options
-                    /*
-                    * Fetch and display the asteroids from the database and only fetch the asteroids from today onwards, ignoring asteroids before today.
-                    * Also, display the asteroids sorted by date (Check SQLite documentation to get sorted data using a query).
-                    * */
                 val dateList = getNextSevenDaysFormattedDates()
-                val startDate = dateList[0]
-                val endDate =  when (filter) {
-                    AsteroidApiFilter.VIEW_WEEK -> dateList.last()
-                    AsteroidApiFilter.VIEW_TODAY -> dateList.get(0)
-                    AsteroidApiFilter.VIEW_SAVED -> dateList.last() //todo implement show saved
+                asteroids =  when (filter) {
+                    AsteroidApiFilter.VIEW_WEEK -> asteroidsRepository.getWeekAsteroids(dateList)
+                    AsteroidApiFilter.VIEW_TODAY -> asteroidsRepository.getTodayAsteroids(dateList[0])
+                    AsteroidApiFilter.VIEW_SAVED -> asteroidsRepository.asteroids
                 }
-                asteroidsRepository.refreshAsteroids(startDate, endDate)
+
                 _statusAsteroids.value = NASAApiStatus.DONE
             }
             catch (e: Exception) {
