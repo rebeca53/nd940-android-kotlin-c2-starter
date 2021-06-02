@@ -10,7 +10,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-private const val API_KEY = "gWsKYvf9fGZLOAptxl15G2iRLV32MdJdKlZDxSGL"
+private const val API_KEY = "INSERT_YOUR_KEY"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
