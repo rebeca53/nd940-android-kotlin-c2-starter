@@ -15,11 +15,12 @@
         android:background="@color/app_background">
 
         <ImageView
-            android:id="@+id/activity_main_image_of_the_day"
+            android:id="@+id/image_asteroid_hazard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             app:asteroidStatusImage="@{viewModel.asteroid.potentiallyHazardous}"
+            app:asteroidStatusContentDescription="@{viewModel.asteroid.potentiallyHazardous}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -31,7 +32,7 @@
             android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_main_image_of_the_day">
+            app:layout_constraintTop_toBottomOf="@+id/image_asteroid_hazard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -93,6 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
+                        android:contentDescription="@string/help_button"
                         app:srcCompat="@drawable/ic_help_circle" />
 
                 </LinearLayout>
