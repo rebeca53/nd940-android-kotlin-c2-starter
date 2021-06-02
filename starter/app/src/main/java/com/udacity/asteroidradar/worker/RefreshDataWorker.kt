@@ -11,8 +11,6 @@ class RefreshDataWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params)  {
     companion object {
         const val WORK_NAME = "RefreshDataWorker"
-        const val START_DATE = "start_date"
-        const val END_DATE = "end_date"
     }
 
     private val date = getTodayFormattedDate()

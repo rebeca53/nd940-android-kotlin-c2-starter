@@ -45,7 +45,6 @@
             tools:text="2020-08-09"
             style="@style/grey_small_bold" />
 
-<!-- todo align image to the right -->
         <ImageView
             android:id="@+id/asteroidImage"
             android:layout_width="wrap_content"
