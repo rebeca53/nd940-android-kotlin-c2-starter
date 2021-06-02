@@ -39,7 +39,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         getImageOfTheDay()
-        getAsteroids(AsteroidApiFilter.VIEW_WEEK)
     }
     val asteroids = asteroidsRepository.asteroids
 
@@ -58,7 +57,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun getAsteroids(filter: AsteroidApiFilter) {
-        _statusAsteroids.value = NASAApiStatus.LOADING
+        if (asteroidsRepository.asteroids.value.isNullOrEmpty()) {
+            _statusAsteroids.value = NASAApiStatus.LOADING
+        }
 
         viewModelScope.launch {
             try {
@@ -75,11 +76,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     AsteroidApiFilter.VIEW_SAVED -> dateList.last() //todo implement show saved
                 }
                 asteroidsRepository.refreshAsteroids(startDate, endDate)
-                val asteroidList = asteroidsRepository.asteroids
                 _statusAsteroids.value = NASAApiStatus.DONE
             }
             catch (e: Exception) {
-                _statusAsteroids.value = NASAApiStatus.ERROR
+                if (asteroidsRepository.asteroids.value.isNullOrEmpty()) {
+                    _statusAsteroids.value = NASAApiStatus.ERROR
+                }
                 Log.e(TAG, "getAsteroids Failure: ${e.message}")
             }
         }
