@@ -45,6 +45,7 @@
             tools:text="2020-08-09"
             style="@style/grey_small_bold" />
 
+        <!--statusIcon sets content description dynamically -->
         <ImageView
             android:id="@+id/asteroidImage"
             android:layout_width="wrap_content"

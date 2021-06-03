@@ -51,4 +51,8 @@ class AsteroidsRepository (private val database: AsteroidsDatabase) {
             it.asDomainModel()
         }
     }
+
+    fun deletePreviousAsteroids(startDate: String) {
+        database.asteroidDao.deletePrevious(startDate)
+    }
 }

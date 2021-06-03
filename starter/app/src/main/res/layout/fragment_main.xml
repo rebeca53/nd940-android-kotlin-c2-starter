@@ -23,18 +23,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <!--pictureOfDayContentDescription sets content description dynamically -->
             <ImageView
-                android:id="@+id/image_asteroid_hazard"
+                android:id="@+id/image_of_the_day"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
                 pictureOfDay="@{viewModel.imageOfDay.url}"
+                pictureOfDayContentDescription="@{viewModel.imageOfDay.title}"
                 app:srcCompat="@drawable/placeholder_picture_of_day"/>
 
             <ImageView
                 android:id="@+id/status_image"
                 imageOfDayNASAApiStatus="@{viewModel.statusImageOfDay}"
+                android:contentDescription="@string/this_is_nasa_s_picture_of_day_showing_nothing_yet"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
@@ -67,6 +70,7 @@
         <ImageView
             android:id="@+id/status_asteroids"
             asteroidNASAApiStatus="@{viewModel.statusAsteroids}"
+            android:contentDescription="@string/this_is_asteroids_data_showing_nothing_yet"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
