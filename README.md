@@ -3,7 +3,7 @@
 Asteroid Radar
 
 ## Important note to reviewer
-Please, insert your API key in NASAApiService.kt, line 13.
+Please, insert your API key in local.properties as apiKey=Your API Key
 
 ## Getting Started
 
